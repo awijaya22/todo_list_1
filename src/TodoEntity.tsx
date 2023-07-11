@@ -4,3 +4,5 @@ type Todo = {
     is_done: boolean;
     date: Date;
 }
+
+export default Todo
