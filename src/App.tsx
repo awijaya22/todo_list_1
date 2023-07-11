@@ -1,26 +1,75 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TodoList from './TodoList';
 import styles from './App.module.css';
+import Todo from './TodoEntity';
+import axios from 'axios';
 
 const App: React.FC = () => {
-  const [todos, setTodos] = useState<string[]>(['Learn React', 'Build an app', 'Deploy it']);
-  const [newTodo, setNewTodo] = useState<string>('');
 
-  const handleComplete = (index: number) => {
-    const updatedTodos = [...todos];
-    updatedTodos[index] = `✅ ${updatedTodos[index]}`;
-    setTodos(updatedTodos);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [newTodo, setNewTodo] = useState<string>();
+
+  const handleLoad = async() => {
+    const response = await axios.get(
+      "https://64acda339edb4181202fe0c5.mockapi.io/todo"
+    )
+    setTodos(response.data)
+  }
+  useEffect(() => {
+    handleLoad();
+  }, []);
+
+  const handleComplete = async (index: number) => {
+    // get the id 
+    let updatedTodos = todos[index];
+    updatedTodos.todo = `✅ ${updatedTodos.todo}`;
+    updatedTodos.is_done = true;
+    if (updatedTodos) {
+      try {
+        await axios.put(
+          `https://64acda339edb4181202fe0c5.mockapi.io/todo/${updatedTodos.id}`,
+          {
+            todo: updatedTodos.todo,
+            is_done: updatedTodos.is_done,
+            date: new Date(),
+          }
+        );
+        handleLoad();
+        console.log("successfully update todos");
+      } catch (error) {
+        console.error("Failed to update todos:", error);
+      }
+    }
   };
 
-  const handleDelete = (index: number) => {
-    const updatedTodos = todos.filter((_, i) => i !== index);
-    setTodos(updatedTodos);
+  const handleDelete = async (index: number) => {
+    // get the id 
+    let updatedTodos = todos[index];
+    if (updatedTodos) {
+      try {
+        await axios.delete(
+          `https://64acda339edb4181202fe0c5.mockapi.io/todo/${updatedTodos.id}`
+        );
+        handleLoad();
+        console.log("successfully delete todos");
+      } catch (error) {
+        console.error("Failed to delete todos:", error);
+      }
+    }
   };
 
-  const handleAddTodo = () => {
-    if (newTodo.trim() !== '') {
-      setTodos([...todos, newTodo]);
-      setNewTodo('');
+  const handleAddTodo = async () => {
+    console.log("hello here", newTodo)
+    if (newTodo != undefined && newTodo.trim() !== '') {
+      const data: object = {
+        todo: newTodo,
+        is_done: false,
+        date: new Date(),
+      }
+      // call api 
+      const response = await axios.post("https://64acda339edb4181202fe0c5.mockapi.io/todo", data)
+      setTodos([...todos, response.data]);
+      setNewTodo(newTodo);
     }
   };
 

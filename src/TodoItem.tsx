@@ -1,8 +1,9 @@
 import React from 'react';
 import styles from './TodoItem.module.css';
+import Todo from './TodoEntity';
 
 interface TodoItemProps {
-  todo: string;
+  todo: Todo;
   onComplete: () => void;
   onDelete: () => void;
 }
@@ -10,7 +11,7 @@ interface TodoItemProps {
 const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onDelete }) => {
   return (
     <li className={styles.todoItem}>
-      <span>{todo}</span>
+      <span>{todo.todo}</span>
       <div className={styles.buttonContainer}>
         <button className={styles.completeButton} onClick={onComplete}>
           Complete
